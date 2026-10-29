@@ -18,9 +18,4 @@ public class ApiHelper {
             .build();
     }
 
-    public static RequestSpecification productRequestSpec() {
-        return new RequestSpecBuilder()
-            .setBaseUri(ConfigReader.getProductBaseUrl())
-            .build();
-    }
 }

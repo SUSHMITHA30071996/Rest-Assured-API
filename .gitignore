@@ -1,11 +1,11 @@
-target/
+﻿target/
 reports/
+test-output/
+*.iml
 *.class
 *.jar
 *.log
 .idea/
-*.iml
 .project
 .classpath
 .settings/
-test-output/

@@ -1,0 +1,508 @@
+{
+	"info": {
+		"name": "GoRest API - CRUD Operations",
+		"description": "Postman collection for GoRest API CRUD testing.\n\nC - POST: Create user (201)\nR - GET: Read user (200)\nU - PUT: Update user (200)\nD - DELETE: Delete user (204)\nR - GET: Verify deleted (404)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{accessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://gorest.co.in"
+		},
+		{
+			"key": "accessToken",
+			"value": "5fc8ca73158102fbc2893cbcc92214668127fdf1fa3d9b0b83b599aa3a897c93"
+		},
+		{
+			"key": "userId",
+			"value": ""
+		}
+	],
+	"item": [
+		{
+			"name": "POST - Create User",
+			"item": [
+				{
+					"name": "1. Create a User (POST - 201)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test('User ID is present', function () {",
+									"    pm.expect(jsonData.id).to.not.be.null;",
+									"});",
+									"",
+									"pm.test('Name matches request', function () {",
+									"    pm.expect(jsonData.name).to.eql('Sushmitha');",
+									"});",
+									"",
+									"pm.test('Email matches request', function () {",
+									"    pm.expect(jsonData.email).to.include('sushmitha');",
+									"});",
+									"",
+									"// Save userId for next requests",
+									"pm.collectionVariables.set('userId', jsonData.id);",
+									"console.log('Created userId: ' + jsonData.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Sushmitha\",\n    \"email\": \"sushmitha_{{$randomInt}}@example.com\",\n    \"gender\": \"female\",\n    \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/public/v2/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["public", "v2", "users"]
+						}
+					}
+				},
+				{
+					"name": "2. Get Created User (GET - 200)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test('User ID matches', function () {",
+									"    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get('userId'));",
+									"});",
+									"",
+									"pm.test('Name is present', function () {",
+									"    pm.expect(jsonData.name).to.not.be.null;",
+									"});",
+									"",
+									"pm.test('Email is present', function () {",
+									"    pm.expect(jsonData.email).to.not.be.null;",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/public/v2/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["public", "v2", "users", "{{userId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "GET - Read Users",
+			"item": [
+				{
+					"name": "1. Get All Users (GET - 200)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test('Response is an array', function () {",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"pm.test('List is not empty', function () {",
+									"    pm.expect(jsonData.length).to.be.greaterThan(0);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/public/v2/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["public", "v2", "users"]
+						}
+					}
+				},
+				{
+					"name": "2. Get Users with Query Params (GET - 200)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test('Response is an array', function () {",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"if (jsonData.length > 0) {",
+									"    pm.test('Filtered results have active status', function () {",
+									"        jsonData.forEach(function(user) {",
+									"            pm.expect(user.status).to.eql('active');",
+									"        });",
+									"    });",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/public/v2/users?status=active",
+							"host": ["{{baseUrl}}"],
+							"path": ["public", "v2", "users"],
+							"query": [
+								{
+									"key": "status",
+									"value": "active"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "3. Create User for GET (POST - 201)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set('userId', jsonData.id);",
+									"console.log('Created userId: ' + jsonData.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"GetTestUser\",\n    \"email\": \"gettest_{{$randomInt}}@example.com\",\n    \"gender\": \"male\",\n    \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/public/v2/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["public", "v2", "users"]
+						}
+					}
+				},
+				{
+					"name": "4. Get User by ID (GET - 200)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test('Correct user returned', function () {",
+									"    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get('userId'));",
+									"});",
+									"",
+									"pm.test('Name is present', function () {",
+									"    pm.expect(jsonData.name).to.not.be.null;",
+									"});",
+									"",
+									"pm.test('Email is present', function () {",
+									"    pm.expect(jsonData.email).to.not.be.null;",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/public/v2/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["public", "v2", "users", "{{userId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "PUT - Update User",
+			"item": [
+				{
+					"name": "1. Create User for Update (POST - 201)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set('userId', jsonData.id);",
+									"console.log('Created userId: ' + jsonData.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"UpdateTestUser\",\n    \"email\": \"updatetest_{{$randomInt}}@example.com\",\n    \"gender\": \"male\",\n    \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/public/v2/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["public", "v2", "users"]
+						}
+					}
+				},
+				{
+					"name": "2. Update User (PUT - 200)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test('Name is updated', function () {",
+									"    pm.expect(jsonData.name).to.eql('Updated Name');",
+									"});",
+									"",
+									"pm.test('Status is updated', function () {",
+									"    pm.expect(jsonData.status).to.eql('inactive');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Name\",\n    \"status\": \"inactive\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/public/v2/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["public", "v2", "users", "{{userId}}"]
+						}
+					}
+				},
+				{
+					"name": "3. Verify Update (GET - 200)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test('Name reflects update', function () {",
+									"    pm.expect(jsonData.name).to.eql('Updated Name');",
+									"});",
+									"",
+									"pm.test('Status reflects update', function () {",
+									"    pm.expect(jsonData.status).to.eql('inactive');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/public/v2/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["public", "v2", "users", "{{userId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "DELETE - Delete User",
+			"item": [
+				{
+					"name": "1. Create User for Delete (POST - 201)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set('userId', jsonData.id);",
+									"console.log('Created userId: ' + jsonData.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"DeleteTestUser\",\n    \"email\": \"deletetest_{{$randomInt}}@example.com\",\n    \"gender\": \"female\",\n    \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/public/v2/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["public", "v2", "users"]
+						}
+					}
+				},
+				{
+					"name": "2. Delete User (DELETE - 204)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 204', function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									"",
+									"pm.test('Response body is empty', function () {",
+									"    pm.expect(pm.response.text()).to.be.empty;",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseUrl}}/public/v2/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["public", "v2", "users", "{{userId}}"]
+						}
+					}
+				},
+				{
+					"name": "3. Verify Deleted (GET - 404)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 404', function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test('Resource not found message', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.eql('Resource not found');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/public/v2/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["public", "v2", "users", "{{userId}}"]
+						}
+					}
+				}
+			]
+		}
+	]
+}

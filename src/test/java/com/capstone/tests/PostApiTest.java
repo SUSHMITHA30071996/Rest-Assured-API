@@ -5,7 +5,6 @@ package com.capstone.tests;
 
 import com.capstone.base.BaseTest;
 import com.capstone.endpoints.Routes;
-import com.capstone.pojo.User;
 import com.capstone.utils.ApiHelper;
 import com.capstone.utils.TestDataGenerator;
 import com.capstone.config.ConfigReader;
@@ -24,10 +23,13 @@ public class PostApiTest extends BaseTest {
 
     @BeforeClass
     public void createTestUser() {
-        User user = TestDataGenerator.createRandomUser();
+        String name = TestDataGenerator.randomName();
+        String email = TestDataGenerator.randomEmail();
+        String body = "{\"name\": \"" + name + "\", \"email\": \"" + email + "\", \"gender\": \"male\", \"status\": \"active\"}";
+
         Response response = given()
             .spec(ApiHelper.gorestRequestSpec())
-            .body(user)
+            .body(body)
         .when()
             .post(Routes.USERS)
         .then()
@@ -51,7 +53,7 @@ public class PostApiTest extends BaseTest {
             .body("[0].body", notNullValue())
             .time(lessThan(ConfigReader.getResponseTimeout()));
 
-        test.get().info("Successfully retrieved posts list");
+        test.info("Successfully retrieved posts list");
     }
 
     @Test(priority = 2, description = "Create a post for a specific user")
@@ -73,7 +75,7 @@ public class PostApiTest extends BaseTest {
             .extract().response();
 
         postId = response.jsonPath().getInt("id");
-        test.get().info("Created post ID: " + postId + " for user ID: " + userId);
+        test.info("Created post ID: " + postId + " for user ID: " + userId);
     }
 
     @Test(priority = 3, dependsOnMethods = "testCreatePostForUser", description = "Add a comment to a post")
@@ -93,7 +95,7 @@ public class PostApiTest extends BaseTest {
             .body("post_id", equalTo(postId))
             .time(lessThan(ConfigReader.getResponseTimeout()));
 
-        test.get().info("Added comment to post ID: " + postId);
+        test.info("Added comment to post ID: " + postId);
     }
 
     @AfterClass

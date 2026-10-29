@@ -14,7 +14,4 @@ public class Routes {
     public static final String USER_POSTS = "/public/v2/users/{userId}/posts";
     public static final String POST_COMMENTS = "/public/v2/posts/{postId}/comments";
 
-    // AutomationExercise Product endpoints
-    public static final String PRODUCTS_LIST = "/api/productsList";
-    public static final String SEARCH_PRODUCT = "/api/searchProduct";
 }

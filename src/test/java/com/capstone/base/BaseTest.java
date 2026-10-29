@@ -6,7 +6,6 @@ package com.capstone.base;
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
-import com.aventstack.extentreports.reporter.configuration.Theme;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
@@ -21,42 +20,45 @@ import java.lang.reflect.Method;
 public class BaseTest {
 
     protected static ExtentReports extent;
-    protected static ThreadLocal<ExtentTest> test = new ThreadLocal<>();
+    protected ExtentTest test;
 
     @BeforeSuite
     public void setupSuite() {
-        ExtentSparkReporter spark = new ExtentSparkReporter("reports/ExtentReport.html");
-        spark.config().setDocumentTitle("REST Assured Capstone - Test Report");
-        spark.config().setReportName("API Automation Report");
-        spark.config().setTheme(Theme.STANDARD);
+        // Set up the HTML report file
+        ExtentSparkReporter reporter = new ExtentSparkReporter("reports/ExtentReport.html");
+        reporter.config().setDocumentTitle("REST Assured Capstone - Test Report");
+        reporter.config().setReportName("API Automation Report");
 
+        // Create the report and attach the reporter
         extent = new ExtentReports();
-        extent.attachReporter(spark);
-        extent.setSystemInfo("Framework", "REST Assured + TestNG");
+        extent.attachReporter(reporter);
         extent.setSystemInfo("Environment", System.getProperty("env", "qa"));
 
+        // Enable REST Assured request and response logging to console
         RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
     }
 
     @BeforeMethod
     public void setupTest(Method method) {
-        ExtentTest extentTest = extent.createTest(method.getName());
-        test.set(extentTest);
+        // Create a new entry in the report for each test method
+        test = extent.createTest(method.getName());
     }
 
     @AfterMethod
     public void teardownTest(ITestResult result) {
+        // Log the result of each test into the report
         if (result.getStatus() == ITestResult.FAILURE) {
-            test.get().fail(result.getThrowable());
+            test.fail(result.getThrowable());
         } else if (result.getStatus() == ITestResult.SKIP) {
-            test.get().skip(result.getThrowable());
+            test.skip(result.getThrowable());
         } else {
-            test.get().pass("Test passed");
+            test.pass("Test passed");
         }
     }
 
     @AfterSuite
     public void teardownSuite() {
+        // Write the report to disk
         extent.flush();
     }
 }

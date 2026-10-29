@@ -42,10 +42,6 @@ public class ConfigReader {
         return getProperty("gorest.token");
     }
 
-    public static String getProductBaseUrl() {
-        return getProperty("automationexercise.baseUrl");
-    }
-
     public static long getResponseTimeout() {
         return Long.parseLong(getProperty("response.timeout"));
     }

@@ -5,7 +5,6 @@ package com.capstone.tests;
 
 import com.capstone.base.BaseTest;
 import com.capstone.endpoints.Routes;
-import com.capstone.pojo.User;
 import com.capstone.utils.ApiHelper;
 import com.capstone.utils.TestDataGenerator;
 import com.capstone.config.ConfigReader;
@@ -21,25 +20,27 @@ public class UserApiTest extends BaseTest {
 
     @Test(priority = 1, description = "Create a new user via POST")
     public void testCreateUser() {
-        User user = TestDataGenerator.createRandomUser();
+        String name = TestDataGenerator.randomName();
+        String email = TestDataGenerator.randomEmail();
+        String body = "{\"name\": \"" + name + "\", \"email\": \"" + email + "\", \"gender\": \"male\", \"status\": \"active\"}";
 
         Response response = given()
             .spec(ApiHelper.gorestRequestSpec())
-            .body(user)
+            .body(body)
         .when()
             .post(Routes.USERS)
         .then()
             .statusCode(201)
-            .body("name", equalTo(user.getName()))
-            .body("email", equalTo(user.getEmail()))
-            .body("gender", equalTo(user.getGender()))
-            .body("status", equalTo(user.getStatus()))
+            .body("name", equalTo(name))
+            .body("email", equalTo(email))
+            .body("gender", equalTo("male"))
+            .body("status", equalTo("active"))
             .body("id", notNullValue())
             .time(lessThan(ConfigReader.getResponseTimeout()))
             .extract().response();
 
         createdUserId = response.jsonPath().getInt("id");
-        test.get().info("Created user ID: " + createdUserId);
+        test.info("Created user ID: " + createdUserId);
     }
 
     @Test(priority = 2, dependsOnMethods = "testCreateUser", description = "Get a single user by ID")
@@ -58,7 +59,7 @@ public class UserApiTest extends BaseTest {
             .body("status", anyOf(equalTo("active"), equalTo("inactive")))
             .time(lessThan(ConfigReader.getResponseTimeout()));
 
-        test.get().info("Retrieved user ID: " + createdUserId);
+        test.info("Retrieved user ID: " + createdUserId);
     }
 
     @Test(priority = 3, description = "Get all users and verify response structure")
@@ -75,7 +76,7 @@ public class UserApiTest extends BaseTest {
             .body("[0].email", notNullValue())
             .time(lessThan(ConfigReader.getResponseTimeout()));
 
-        test.get().info("Successfully retrieved users list");
+        test.info("Successfully retrieved users list");
     }
 
     @Test(priority = 4, dependsOnMethods = "testCreateUser", description = "Update an existing user via PUT")
@@ -94,7 +95,7 @@ public class UserApiTest extends BaseTest {
             .body("status", equalTo("inactive"))
             .time(lessThan(ConfigReader.getResponseTimeout()));
 
-        test.get().info("Updated user " + createdUserId + " name to: " + updatedName);
+        test.info("Updated user " + createdUserId + " name to: " + updatedName);
     }
 
     @Test(priority = 5, dependsOnMethods = "testCreateUser", description = "Delete user via DELETE")
@@ -108,6 +109,6 @@ public class UserApiTest extends BaseTest {
             .statusCode(204)
             .time(lessThan(ConfigReader.getResponseTimeout()));
 
-        test.get().info("Deleted user ID: " + createdUserId);
+        test.info("Deleted user ID: " + createdUserId);
     }
 }
